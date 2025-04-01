@@ -1,0 +1,14 @@
+{
+  "files.associations": {
+    "array": "c",
+    "deque": "c",
+    "forward_list": "c",
+    "list": "c",
+    "string": "c",
+    "unordered_map": "c",
+    "vector": "c",
+    "io_context": "c",
+    "string_view": "c",
+    "initializer_list": "c"
+  }
+}
