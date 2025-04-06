@@ -65,26 +65,7 @@ int main() {
 
    pthread_create(&flusher_thread, NULL, flush_thread, NULL);
 
-   // // Simulate log writing
-   // wrlog("Log 1");
-   // wrlog("Log 2");
-   // wrlog("Log 3");
-   // wrlog("Log 4");
-   // wrlog("Log 5");
-   // wrlog("Log 6");
-   // wrlog("Log 7");
-   // wrlog("Log 8");
-   // wrlog("Log 9");
-   // wrlog("Log 10");
-   // wrlog("Log 11");
-   // wrlog("Log 12");
-   // wrlog("Log 13");
-   // wrlog("Log 14");
-   // wrlog("Log 15");
-   // wrlog("Log 16");
-   // wrlog("Log 17");
-   // wrlog("Log 18");
-
+   // Simulate log writing
    for (int i = 0; i < 30; i++) {
       char log[MAX_LOG_LENGTH];
       snprintf(log, MAX_LOG_LENGTH, "Item (%d)", i);
