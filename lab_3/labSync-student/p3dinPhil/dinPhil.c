@@ -12,24 +12,32 @@ pthread_cond_t chopstick[N];
 void *philosopher(void*);
 void eat(int);
 void think(int);
+
+sem_t forks[N];
+
 int main()
 {
-   int i, a[N];
+   int a[N];
    pthread_t tid[N];
 
-   pthread_mutex_init(&mtx, NULL);
-
-   for (i = 0; i < N; i++)
-	   pthread_cond_init(&chopstick[i], NULL);
-
-   for (i = 0; i < 5; i++)
-   {
-      a[i] = i;
-      pthread_create(&tid[i], NULL, philosopher, (void*) &a[i]);
+   for (int i = 0; i < N; i++) {
+      sem_init(&forks[i], 0, 1); 
    }
 
-   for (i = 0; i < 5; i++)
-      pthread_join(tid[i], NULL);
+   for (int i = 0; i < N; i++) {
+         a[i] = i;
+         pthread_create(&tid[i], NULL, philosopher, &a[i]);
+   }
+
+   for (int i = 0; i < N; i++) {
+         pthread_join(tid[i], NULL);
+   }
+
+   for (int i = 0; i < N; i++) {
+         sem_destroy(&forks[i]);
+   }
+
+   return 0;
 }
 
 void *philosopher(void *num)
@@ -39,30 +47,31 @@ void *philosopher(void *num)
 	  
    while (1)
    {
-      pthread_cond_wait(&chopstick[phil], &mtx);
-      pthread_cond_wait(&chopstick[(phil + 1) % N], &mtx);
-      printf("Philosopher %d takes fork %d and %d\n",
-	          phil, phil, (phil + 1) % N);
-			  
-      eat(phil);
-      sleep(2);
+      think(phil);
 
-       printf("Philosopher %d puts fork %d and %d down\n",
-	          phil, (phil + 1) % N, phil);
-      pthread_cond_signal(&chopstick[phil]);
-      pthread_cond_signal(&chopstick[(phil + 1) % N]);
+      sem_wait(&forks[phil]);               // Pick left fork
+      sem_wait(&forks[(phil + 1) % N]);    // Pick right fork
 
-	  think(phil);
-	  sleep(1);
+      eat(phil);                   
+
+      sem_post(&forks[(phil + 1) % N]);    // Release right fork
+      sem_post(&forks[phil]);               // Release left fork
+
+      printf("Philosopher %d has finished eating!\n", phil);
+      sleep(3); 
    }
+
+   return NULL;
 }
 
 void eat(int phil)
 {
    printf("Philosopher %d is eating\n", phil);
+   sleep(1);
 }
 
 void think(int phil)
 {
    printf("Philosopher %d is thinking\n", phil);
+   sleep(1);
 }
