@@ -62,10 +62,9 @@ void* sum_worker (void *arg) {
    sumbuf += local_sum;  // Update the global total sum
    pthread_mutex_unlock(&mtx);  // Unlock the mutex
  
-   printf("Thread completed range %d to %d with local sum: %ld\n", idx_range.start, idx_range.end, local_sum);
+   // printf("Thread completed range %d to %d with local sum: %ld\n", idx_range.start, idx_range.end, local_sum);
       
    return 0;
-		
 }
 
 int main(int argc, char * argv[]) {

@@ -5,18 +5,24 @@
 
 int MAX_COUNT = 1e9;
 static int count = 0;
+pthread_mutex_t mutex; // mutex for critical section
 
 void *f_count(void *sid) {
-  int i;
+  int i ;
+
+  pthread_mutex_lock(&mutex);
   for (i = 0; i < MAX_COUNT; i++) {
     count = count + 1;
   }
+  pthread_mutex_unlock(&mutex);
 
-  printf("Thread %s: holding %d \n", (char *) sid, count);
+  printf ("Thread %s: holding %d \n", (char*) sid , count);
+  return NULL; 
 }
 
 int main() {
   pthread_t thread1, thread2;
+  pthread_mutex_init(&mutex, NULL); // Initialize the mutex
 
   /* Create independent threads each of which will execute function */
   pthread_create( &thread1, NULL, &f_count, "1");
@@ -28,6 +34,8 @@ int main() {
 
   // Wait for thread th1 finish
   pthread_join( thread2, NULL);
+
+  pthread_mutex_destroy(&mutex); // Destroy the mutex
 
   return 0;
 }

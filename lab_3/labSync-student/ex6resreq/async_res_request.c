@@ -25,7 +25,7 @@ void* resource_manager(void* arg) {
     pthread_mutex_lock(&resource_lock);
 
     while (request->requested_resources > available_resources) {
-        printf("Process (%d) waiting for resource: %d\n", request->id, request->requested_resources);
+        printf("Process (%d) is waiting for: %d\n", request->id, request->requested_resources);
         pthread_cond_wait(&resource_cond, &resource_lock);
     }
 
@@ -35,12 +35,12 @@ void* resource_manager(void* arg) {
 
     // TODO: Perform process
     // Simulate some processing time
-    printf("Process (%d) is processing resource: %d\n", request->id, request->requested_resources);
+    printf("Process (%d) is processing: %d\n", request->id, request->requested_resources);
     sleep(3);
 
     pthread_mutex_lock(&resource_lock);
     available_resources += request->requested_resources;
-    printf("Process (%d) released resources: %d\n", request->id, request->requested_resources);
+    printf("Process (%d) released: %d\n", request->id, request->requested_resources);
     sleep(3);
 
     pthread_cond_broadcast(&resource_cond);

@@ -26,13 +26,13 @@ int main()
    // Get the sequence number before reading
    unsigned int seq_start = pthread_seqlock_rdlock(&lock);
 
-   // Get the sequence number after reading
-   unsigned int seq_end = pthread_seqlock_rdunlock(&lock);
-   
-   // Check if the read was consistent (sequence didn't change and is even)
-   if(seq_start == seq_end && !(seq_start & 1)) {
-      printf("Read successful! val = %d\n", val);
+   if(!(seq_start & 1)) {  // Can only read if the sequence is even
+      // Read the value
+      printf("Read successful! Value: %d\n", val);
+      pthread_seqlock_rdunlock(&lock);
    } else {
-      printf("Read failed!\n");
+      printf("Write in progress, cannot read!\n");
    }
+
+   return 0;
 }
