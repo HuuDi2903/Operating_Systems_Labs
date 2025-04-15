@@ -1,0 +1,22 @@
+- WORK_THREAD Output:
+Assign tsk 0 wrk 0 
+Assign tsk 1 wrk 1 
+worker wake 0 up
+Assign tsk 2 wrk 2 
+Assign tsk 2 wrk 2 
+Task func - Hello from 1
+worker wake 1 up
+Task func - Hello from 2
+worker wake 2 up
+Task func - Hello from 5
+
+- Fork Mode Output:
+Assign tsk 0 wrk 0 
+brkwrk dispatch wrkid 0 - send signal to PID 27097
+Assign tsk 1 wrk 1 
+Assign tsk 2 wrk 2 
+brkwrk dispatch wrkid 1 - send signal to PID 27098
+brkwrk dispatch wrkid 2 - send signal to PID 27099
+worker wake 1 up
+worker wake 2 up
+worker wake 0 up

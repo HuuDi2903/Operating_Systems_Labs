@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.txt": "c",
+    "sched.h": "c"
+  }
+}
