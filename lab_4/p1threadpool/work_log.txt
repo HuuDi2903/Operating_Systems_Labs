@@ -1,0 +1,12 @@
+<Worklist>:
+- Practice 1: Implemented by instructor
+- Practice 2: Cron tab
+- Problem 1: Implement the FIFO scheduler policy to bkwrk_get_worker() in section 3.1.2
+- Problem 2:  Insection 3.1.1 You are provided a thread based implementation of task worker in 
+              the function bkwrk_worker(). Try to implement another version of the worker using 
+              more common fork() API.
+- Problem 3:  Base on the provided material of multi-task programming and signal control, develop
+              your own framework of Fork-Join in theory.
+
+15/04, Tue:
+Done Prob 1; Stuck on Prob 2
