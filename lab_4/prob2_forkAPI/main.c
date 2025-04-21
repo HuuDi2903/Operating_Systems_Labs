@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include "bktpool.h"
 #undef STRESS_TEST
+#define STRESS_TEST
 
 int func(void * arg) {
-  int id = * ((int * ) arg);
+  int id = (int)(intptr_t)arg;
 
   printf("Task func - Hello from %d\n", id);
   fflush(stdout);
@@ -27,11 +28,11 @@ int main(int argc, char * argv[]) {
     return -1;
 
   id[0] = 1;
-  bktask_init( & tid[0], & func, (void * ) & id[0]);
+  bktask_init( & tid[0], & func, (void *)(intptr_t)id[0]);
   id[1] = 2;
-  bktask_init( & tid[1], & func, (void * ) & id[1]);
+  bktask_init( & tid[1], & func, (void *)(intptr_t)id[1]);
   id[2] = 5;
-  bktask_init( & tid[2], & func, (void * ) & id[2]);
+  bktask_init( & tid[2], & func, (void *)(intptr_t)id[2]);
 
   wid[1] = bkwrk_get_worker();
   ret = bktask_assign_worker(tid[0], wid[1]);
@@ -57,10 +58,14 @@ int main(int argc, char * argv[]) {
   sleep(1);
 
 #ifdef STRESS_TEST
+  printf("----------------------\n");
+  printf("Stress test\n");
+  printf("----------------------\n");
+
   int i = 0;
   for (i = 0; i < 15; i++) {
     id[i] = i;
-    bktask_init( & tid[i], & func, (void * ) & id[i]);
+    bktask_init( & tid[i], & func, (void *)(intptr_t)id[i]);
 
     wid[i] = bkwrk_get_worker();
     ret = bktask_assign_worker(tid[i], wid[i]);

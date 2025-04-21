@@ -12,14 +12,21 @@
 #include <fcntl.h>
 #include <errno.h>
 
-extern struct bkworker_t *shared_workers;  // Shared memory for workers
-extern int *shared_busy_flags;            // Shared flags for busy status
-extern int shared_memory_initialized;     // Flag to track initialization
-
 #define MAX_WORKER 10
 #define WRK_THREAD 1
 #define STACK_SIZE 4096
 #define SIG_DISPATCH SIGUSR1
+
+// FIFO queue for available workers
+extern int wrk_fifo[MAX_WORKER];
+extern int wrk_fifo_head; // dequeue here
+extern int wrk_fifo_tail; // enqueue here
+extern int wrk_fifo_size;
+extern pthread_mutex_t wrk_fifo_mutex;
+
+// Shared memory
+extern struct bkworker_t *shared_workers;
+extern int *shared_busy_flags;
 
 /* Task ID is unique non-decreasing integer */
 int taskid_seed;
@@ -61,7 +68,5 @@ void * bkwrk_worker(void * arg);
 int bkwrk_create_worker();
 int bkwrk_dispatch_worker(unsigned int wrkid);
 int bkwrk_get_worker();
-
-extern int task_arg_values[MAX_WORKER];  // Store actual values
 
 #endif

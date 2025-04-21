@@ -6,11 +6,38 @@
 #include <linux/sched.h>
 #include <sys/syscall.h>      /* Definition of SYS_* constants */
 #include <unistd.h>
+#include <sys/mman.h>
 
-
-#define DEBUG
+// #define DEBUG
 #define INFO
-// #define WORK_THREAD
+#define WORK_THREAD
+
+// FIFO for available workers
+int wrk_fifo[MAX_WORKER];
+int wrk_fifo_head = 0, wrk_fifo_tail = 0, wrk_fifo_size = 0;
+pthread_mutex_t wrk_fifo_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void enqueue_worker(int wid) {
+  pthread_mutex_lock(&wrk_fifo_mutex);
+  if (wrk_fifo_size < MAX_WORKER) {
+      wrk_fifo[wrk_fifo_tail] = wid;
+      wrk_fifo_tail = (wrk_fifo_tail + 1) % MAX_WORKER;
+      wrk_fifo_size++;
+  }
+  pthread_mutex_unlock(&wrk_fifo_mutex);
+}
+
+int dequeue_worker(void) {
+  pthread_mutex_lock(&wrk_fifo_mutex);
+  int wid = -1;
+  if (wrk_fifo_size > 0) {
+      wid = wrk_fifo[wrk_fifo_head];
+      wrk_fifo_head = (wrk_fifo_head + 1) % MAX_WORKER;
+      wrk_fifo_size--;
+  }
+  pthread_mutex_unlock(&wrk_fifo_mutex);
+  return wid;
+}
 
 void * bkwrk_worker(void * arg) {
   sigset_t set;
@@ -49,6 +76,8 @@ void * bkwrk_worker(void * arg) {
     worker[i].func = NULL;
     worker[i].arg = NULL;
     worker[i].bktaskid = -1;
+
+    enqueue_worker(i); // Mark this worker as available again (FIFO)
   }
 }
 
@@ -101,7 +130,7 @@ int bkwrk_create_worker() {
 
     usleep(100);
 
-    #else
+#else
     /* TODO: Implement fork version of create worker */
     int worker_id = i;
     pid_t pid = fork();
@@ -128,7 +157,7 @@ int bkwrk_create_worker() {
         fprintf(stderr, "bkwrk_create_worker got worker (fork) %u\n", pid);
         #endif
         
-        usleep(100); // Give child time to initialize
+        usleep(100);
     } else {
         // Fork failed
         fprintf(stderr, "Fork failed for worker %d\n", i);
@@ -136,6 +165,11 @@ int bkwrk_create_worker() {
     }
 #endif
   }
+
+  // Initialize the FIFO queue
+  wrk_fifo_head = wrk_fifo_tail = wrk_fifo_size = 0;
+  for(int i=0; i<MAX_WORKER; ++i)
+      enqueue_worker(i);
 
   return 0;
 }
@@ -145,11 +179,8 @@ int bkwrk_get_worker() {
    * The return value is the ID of the worker which is not currently 
    * busy or wrkid_busy[1] == 0 
    */
-  for(int i = 0; i < MAX_WORKER; i++) {
-    if (wrkid_busy[i] == 0) {
-      return i;
-    }
-  }
+
+  return dequeue_worker();
 }
 
 int bkwrk_dispatch_worker(unsigned int wrkid) {
@@ -162,7 +193,8 @@ int bkwrk_dispatch_worker(unsigned int wrkid) {
     return -1;
 
   syscall(SYS_tkill, tid, SIG_DISPATCH);
-  #else
+
+#else
   /* TODO: Implement fork version to signal worker process here */
   pid_t worker_pid = wrkid_tid[wrkid];
     
